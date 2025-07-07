@@ -415,13 +415,13 @@ namespace llarp
       RouterContact::BlockBogons = false;
     }
 
-    // Lokid Config
-    usingSNSeed      = conf->lokid.usingSNSeed;
-    ident_keyfile    = conf->lokid.ident_keyfile;
-    whitelistRouters = conf->lokid.whitelistRouters;
-    lokidRPCAddr     = conf->lokid.lokidRPCAddr;
-    lokidRPCUser     = conf->lokid.lokidRPCUser;
-    lokidRPCPassword = conf->lokid.lokidRPCPassword;
+    // Arqmad Config
+    usingSNSeed       = conf->arqmad.usingSNSeed;
+    ident_keyfile     = conf->arqmad.ident_keyfile;
+    whitelistRouters  = conf->arqmad.whitelistRouters;
+    arqmadRPCAddr     = conf->arqmad.arqmadRPCAddr;
+    arqmadRPCUser     = conf->arqmad.arqmadRPCUser;
+    arqmadRPCPassword = conf->arqmad.arqmadRPCPassword;
 
     // TODO: add config flag for "is service node"
     if(conf->links.inboundLinks().size())
@@ -942,17 +942,17 @@ namespace llarp
     if(whitelistRouters)
     {
       rpcCaller = std::make_unique< rpc::Caller >(this);
-      rpcCaller->SetAuth(lokidRPCUser, lokidRPCPassword);
-      while(!rpcCaller->Start(lokidRPCAddr))
+      rpcCaller->SetAuth(arqmadRPCUser, arqmadRPCPassword);
+      while(!rpcCaller->Start(arqmadRPCAddr))
       {
-        LogError("failed to start jsonrpc caller to ", lokidRPCAddr);
+        LogError("failed to start jsonrpc caller to ", arqmadRPCAddr);
 #if defined(ANDROID) || defined(RPI)
         sleep(1);
 #else
         std::this_thread::sleep_for(std::chrono::seconds(1));
 #endif
       }
-      LogInfo("RPC Caller to ", lokidRPCAddr, " started");
+      LogInfo("RPC Caller to ", arqmadRPCAddr, " started");
     }
 
     if(!cryptoworker->start())

@@ -1,0 +1,14 @@
+[Unit]
+Description=ArqNET: Anonymous Network layer thingydoo.
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=debian-arqnet
+SyslogIdentifier=arqnet
+ExecStartPre=/bin/bash -c "/usr/bin/arqnet-bootstrap && /usr/bin/arqnet -g"
+ExecStart=/usr/bin/arqnet
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

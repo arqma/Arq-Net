@@ -1,0 +1,24 @@
+# Last Modified: Sat May  4 18:48:24 2019
+#include <tunables/global>
+
+/usr/bin/arqnet {
+  #include <abstractions/base>
+
+  capability net_admin,
+  capability net_bind_service,
+
+  network inet dgram,
+  network inet6 dgram,
+  network netlink raw,
+
+  /dev/net/tun rw,
+  /lib/@{multiarch}/ld-*.so mr,
+  /usr/bin/arqnet mr,
+
+  owner /var/lib/arqnet/ rw,
+  owner /var/lib/arqnet/** rwk,
+
+  owner @{HOME}/.arqnet/ rw,
+  owner @{HOME}/.arqnet/** rwk,
+
+}

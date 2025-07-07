@@ -2,10 +2,10 @@
 {
   "targets": [
     {
-      "target_name": "lokinet",
+      "target_name": "arqnet",
       "cflags!": [ "-fno-exceptions" ],
       "cflags_cc!": [ "-fno-exceptions" ],
-      "sources": [ "lokinet.cc" ],
+      "sources": [ "arqnet.cc" ],
       "include_dirs": [
         "<!@(node -p \"require('node-addon-api').include\")"
       ],

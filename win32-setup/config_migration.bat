@@ -1,4 +1,4 @@
 @echo off
-copy lokinet.ini lokinet.old.ini
-del lokinet.ini
-%PROGRAMFILES%\Loki Project\Lokinet\lokinet -g
+copy arqnet.ini arqnet.old.ini
+del arqnet.ini
+%PROGRAMFILES%\Arqma Project\Arqnet\arqnet -g

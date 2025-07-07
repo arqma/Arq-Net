@@ -1,11 +1,6 @@
 #ifndef LLARP_STRING_VIEW_HPP
 #define LLARP_STRING_VIEW_HPP
 
-// Copied from loki-mq (with namespaces modified); when we fully import loki-mq
-// we can just use it directly.
-
-// To keep this identical to loki-mq's copy (e.g. to be able to diff it):
-//
 // clang-format off
 
 #include <string>

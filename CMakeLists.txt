@@ -1,22 +1,29 @@
-cmake_minimum_required(VERSION 3.10)  # bionic's cmake version
+cmake_minimum_required(VERSION 3.18)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
 endif()
 
-set(PROJECT_NAME lokinet)
+set(PROJECT_NAME arqnet)
 project(${PROJECT_NAME}
-    VERSION 0.7.1
-    DESCRIPTION "lokinet - IP packet onion router"
+    VERSION 1.0.0
+    DESCRIPTION "arqnet - Arqma Network onion vpn"
     LANGUAGES C CXX)
 
-set(RELEASE_MOTTO "I'll remember that..." CACHE STRING "Release motto")
+set(RELEASE_MOTTO "Privacy is a Must" CACHE STRING "Release motto")
 
-add_definitions(-DLLARP_VERSION_MAJOR=${lokinet_VERSION_MAJOR})
-add_definitions(-DLLARP_VERSION_MINOR=${lokinet_VERSION_MINOR})
-add_definitions(-DLLARP_VERSION_PATCH=${lokinet_VERSION_PATCH})
+add_definitions(-DLLARP_VERSION_MAJOR=${arqnet_VERSION_MAJOR})
+add_definitions(-DLLARP_VERSION_MINOR=${arqnet_VERSION_MINOR})
+add_definitions(-DLLARP_VERSION_PATCH=${arqnet_VERSION_PATCH})
 
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+  cmake_policy(SET CMP0135 NEW)
+  set(CMAKE_POLICY_DEFAULT_CMP0135 NEW)
+endif()
+
+cmake_policy(SET CMP0148 OLD)
+set(CMAKE_POLICY_DEFAULT_CMP0148 OLD)
 
 # Core options
 option(USE_AVX2 "enable avx2 code" OFF)
@@ -119,7 +126,7 @@ endif(XSAN)
 
 if(CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
   set(OPTIMIZE_FLAGS "")
-  add_definitions(-DLOKINET_DEBUG=1)
+  add_definitions(-DARQNET_DEBUG=1)
   set(CRYPTO_FLAGS "")
   add_compile_options( ${DEBUG_FLAGS} )
   link_libraries( ${DEBUG_FLAGS} )
@@ -219,7 +226,7 @@ unset(GIT_VERSION)
 unset(GIT_VERSION_REAL)
 
 if(NOT GIT_VERSION)
-  exec_program("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "rev-parse --short HEAD" OUTPUT_VARIABLE GIT_VERSION_UNSTRIP)
+  execute_process(COMMAND "${GIT}" rev-parse --short HEAD OUTPUT_VARIABLE GIT_VERSION_UNSTRIP)
   string(STRIP "${GIT_VERSION_UNSTRIP}" GIT_VERSION)
 endif(NOT GIT_VERSION)
 

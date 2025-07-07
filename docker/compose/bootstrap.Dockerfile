@@ -1,8 +1,8 @@
 FROM compose-base:latest
 
-ENV LOKINET_NETID=docker
+ENV ARQNET_NETID=docker
 
-COPY ./docker/compose/bootstrap.ini /root/.lokinet/lokinet.ini
+COPY ./docker/compose/bootstrap.ini /root/.arqnet/arqnet.ini
 
-CMD ["/lokinet"]
+CMD ["/arqnet"]
 EXPOSE 1090/udp 1190/tcp

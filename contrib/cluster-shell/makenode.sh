@@ -1,7 +1,7 @@
-mkdir loki$1
-cd loki$1
-ln -s ../lokinet lokinet$1
-cp ../lokinet.ini .
-nano lokinet.ini
+mkdir arq$1
+cd arq$1
+ln -s ../arqnet arqnet$1
+cp ../arqnet.ini .
+nano arqnet.ini
 cd ..
-echo "killall -9 lokinet$1" >> ../stop.sh
+echo "killall -9 arqnet$1" >> ../stop.sh

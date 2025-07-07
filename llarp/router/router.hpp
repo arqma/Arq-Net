@@ -75,7 +75,7 @@ namespace llarp
     // our router contact
     RouterContact _rc;
 
-    /// are we using the lokid service node seed ?
+    /// are we using the arqmad service node seed ?
     bool usingSNSeed = false;
 
     /// should we obey the service node whitelist?
@@ -262,11 +262,11 @@ namespace llarp
     std::string rpcBindAddr = DefaultRPCBindAddr;
     const llarp_time_t _randomStartDelay;
 
-    /// lokid caller
+    /// arqmad caller
     std::unique_ptr< rpc::Caller > rpcCaller;
-    std::string lokidRPCAddr = "127.0.0.1:22023";
-    std::string lokidRPCUser;
-    std::string lokidRPCPassword;
+    std::string arqmadRPCAddr = "127.0.0.1:19994";
+    std::string arqmadRPCUser;
+    std::string arqmadRPCPassword;
 
     Profiling _routerProfiling;
     std::string routerProfilesFile = "profiles.dat";

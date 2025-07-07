@@ -6,7 +6,7 @@ namespace llarp
 {
   namespace service
   {
-    const std::set< std::string > Address::AllowedTLDs = {".loki", ".snode"};
+    const std::set< std::string > Address::AllowedTLDs = {".arqma", ".snode"};
 
     bool
     Address::PermitTLD(const char* tld)

@@ -12,18 +12,18 @@
 #endif
 
 #ifdef DEBIAN
-#ifndef DEFAULT_LOKINET_USER
-#define DEFAULT_LOKINET_USER "debian-lokinet"
+#ifndef DEFAULT_ARQNET_USER
+#define DEFAULT_ARQNET_USER "debian-arqnet"
 #endif
-#ifndef DEFAULT_LOKINET_GROUP
-#define DEFAULT_LOKINET_GROUP "debian-lokinet"
+#ifndef DEFAULT_ARQNET_GROUP
+#define DEFAULT_ARQNET_GROUP "debian-arqnet"
 #endif
 #else
-#ifndef DEFAULT_LOKINET_USER
-#define DEFAULT_LOKINET_USER "lokinet"
+#ifndef DEFAULT_ARQNET_USER
+#define DEFAULT_ARQNET_USER "arqnet"
 #endif
-#ifndef DEFAULT_LOKINET_GROUP
-#define DEFAULT_LOKINET_GROUP "lokinet"
+#ifndef DEFAULT_ARQNET_GROUP
+#define DEFAULT_ARQNET_GROUP "arqnet"
 #endif
 #endif
 

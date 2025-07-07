@@ -1,23 +1,12 @@
-# Lokinet
+# ArqNet
 
-[Español](readme_es.md)
-
-Lokinet is the reference implementation of LLARP (low latency anonymous routing protocol), a layer 3 onion routing protocol.
+Arqnet is the reference implementation of LLARP (low latency anonymous routing protocol), a layer 3 onion routing protocol.
 
 You can learn more about the high level design of LLARP [here](docs/high-level.txt)
 
 And you can read the LLARP protocol specification [here](docs/proto_v0.txt)
 
-You can view documentation on how to get started [here](https://loki-project.github.io/loki-docs/Lokinet/LokinetOverview/) .
-
-![build status](https://gitlab.com/lokiproject/loki-network/badges/master/pipeline.svg "build status")
-![travis-ci](https://travis-ci.org/loki-project/loki-network.svg?branch=master "ci status")
-
 ## Usage
-
-See the [documentation](https://loki-project.github.io/loki-docs/Lokinet/LokinetOverview/) on how to get started.
-
-Also read the [Public Testing Guide](https://lokidocs.com/Lokinet/Guides/PublicTestingGuide/#1-lokinet-installation) for installation and other helpful information.
 
 ## Running on Linux
 
@@ -25,40 +14,40 @@ Also read the [Public Testing Guide](https://lokidocs.com/Lokinet/Guides/PublicT
 
 to run as client:
 
-    $ lokinet -g
-    $ lokinet-bootstrap
-    $ lokinet
+    $ arqnet -g
+    $ arqnet-bootstrap
+    $ arqnet
 
 to run as relay:
 
-    $ lokinet -r -g
-    $ lokinet-bootstrap
-    $ lokinet
+    $ arqnet -r -g
+    $ arqnet-bootstrap
+    $ arqnet
 
 ## Running on MacOS/UNIX/BSD
 
 **YOU HAVE TO RUN AS ROOT**, run using sudo. Elevated privileges are needed to create the virtual tunnel interface.
 
-The MacOS installer places the normal binaries (`lokinet` and `lokinet-bootstrap`) in `/usr/local/bin` which should be in your path, so you can easily use the binaries from your terminal. The installer also nukes your previous config and keys and sets up a fresh config and downloads the latest bootstrap seed.
+The MacOS installer places the normal binaries (`arqnet` and `arqnet-bootstrap`) in `/usr/local/bin` which should be in your path, so you can easily use the binaries from your terminal. The installer also nukes your previous config and keys and sets up a fresh config and downloads the latest bootstrap seed.
 
 to run as client:
 
-    $ lokinet -g
-    $ lokinet-bootstrap
-    $ sudo lokinet
+    $ arqnet -g
+    $ arqnet-bootstrap
+    $ sudo arqnet
 
 to run as relay:
 
-    $ lokinet -r -g
-    $ lokinet-bootstrap
-    $ sudo lokinet
+    $ arqnet -r -g
+    $ arqnet-bootstrap
+    $ sudo arqnet
 
 
 ## Running on Windows
 
 **DO NOT RUN AS ELEVATED USER**, run as normal user.
 
-to run as client, run the `run-lokinet.bat` batch file as your normal user.
+to run as client, run the `run-arqnet.bat` batch file as your normal user.
 
 
 ## Building
@@ -78,8 +67,8 @@ Build requirements:
 build:
 
     $ sudo apt install build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config
-    $ git clone https://github.com/loki-project/loki-network
-    $ cd loki-network
+    $ git clone https://github.com/arqma/arq-net
+    $ cd arq-net
     $ make 
 
 install:
@@ -109,8 +98,8 @@ cross compile fully static armhf (rpi 2 and up)
 build:
     make sure you have cmake, libuv and xcode command line tools installed
     
-    $ git clone https://github.com/loki-project/loki-network
-    $ cd loki-network
+    $ git clone https://github.com/arqma/arq-net
+    $ cd arq-net
     $ make -j8
 
 install:
@@ -154,8 +143,8 @@ build:
     $ sudo pkg install build-essential gcc8 wget tuntap cmake (optional: ninja ccache - from omnios extra) (OmniOS CE)
     $ sudo pkg install base-developer-utilities developer-gnu developer-studio-utilities gcc-7 wget cmake (Oracle Solaris, see note)
     $ sudo pkg install build-essential wget gcc-8 documentation/tuntap header-tun tun (optional: ninja ccache) (all other SunOS)
-    $ git clone https://github.com/loki-project/loki-network
-    $ cd loki-network
+    $ git clone https://github.com/arqma/arq-net
+    $ cd arq-net
     $ gmake -j8
 
 install:
@@ -172,8 +161,8 @@ TODO: add pkgsrc instructions
 build:
 
     # pkg_add curl cmake git (optional: ninja ccache)
-    $ git clone https://github.com/loki-project/loki-network
-    $ cd loki-network
+    $ git clone https://github.com/arqma/arq-net
+    $ cd arq-net
     $ gmake -j8
 
 install (root):
@@ -185,8 +174,8 @@ install (root):
 build:
 
     $ pkg install cmake git curl libuv libsodium pkgconf
-    $ git clone https://github.com/loki-project/loki-network
-    $ cd loki-network
+    $ git clone https://github.com/arqma/arq-net
+    $ cd arq-net
     $ mkdir build
     $ cmake -DCMAKE_BUILD_TYPE=Release ..
     $ make

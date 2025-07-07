@@ -40,19 +40,20 @@ vsproject/
 .vs
 
 daemon.ini
-lokinet-win32.exe
-lokinet
-lokinet.exe
-
+arqnet-win32.exe
+arqnet
+arqnet.exe
+arqnet-static
+arqnet-static.exe
 
 .gradle/
 .idea
 .vscode
 build64/
 build2/
-/contrib/lokinet-bootstrap-winnt/cacert.pem
-/contrib/lokinet-bootstrap-winnt/data.enc
-/contrib/lokinet-bootstrap-winnt/out.bine
+/contrib/arqnet-bootstrap-winnt/cacert.pem
+/contrib/arqnet-bootstrap-winnt/data.enc
+/contrib/arqnet-bootstrap-winnt/out.bine
 default.profraw
 
 # ctags shit
@@ -61,7 +62,7 @@ GRTAGS
 GPATH
 version.txt
 
-lokinet-bootstrap.exe
+arqnet-bootstrap.exe
 regdbhelper.dll
 # xcode
 xcuserdata/

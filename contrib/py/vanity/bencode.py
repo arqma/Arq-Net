@@ -11,7 +11,7 @@ class BCodec:
   def _write_bytestring(self, bs):
     self._fd.write('{}:'.format(len(bs)).encode('ascii'))
     self._fd.write(bs)
-  
+
   def _write_list(self, l):
     self._fd.write(b'l')
     for item in l:

@@ -1,7 +1,7 @@
 #!/bin/sh
-killall -9 lokinet1
-killall -9 lokinet2
-killall -9 lokinet3
-killall -9 lokinet4
-killall -9 lokinet5
-killall -9 lokinet6
+killall -9 arqnet1
+killall -9 arqnet2
+killall -9 arqnet3
+killall -9 arqnet4
+killall -9 arqnet5
+killall -9 arqnet6

@@ -1,9 +1,9 @@
-#ifndef LOKINET_BOOTSERV_HANDLER_HPP
-#define LOKINET_BOOTSERV_HANDLER_HPP
+#ifndef ARQNET_BOOTSERV_HANDLER_HPP
+#define ARQNET_BOOTSERV_HANDLER_HPP
 #include <iostream>
-#include "lokinet-config.hpp"
+#include "arqnet-config.hpp"
 
-namespace lokinet
+namespace arqnet
 {
   namespace bootserv
   {
@@ -38,6 +38,6 @@ namespace lokinet
     NewCronHandler(std::ostream& out);
 
   }  // namespace bootserv
-}  // namespace lokinet
+}  // namespace arqnet
 
 #endif

@@ -1,24 +1,24 @@
 {
-  "name": "lokinet-monitor",
+  "name": "arqnet-monitor",
   "version": "0.0.1",
-  "description": "Lokinet monitor",
+  "description": "Arqnet monitor",
   "main": "monitor_client.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/loki-project/loki-network.git"
+    "url": "git+https://github.com/arqma/arq-net.git"
   },
   "keywords": [
-    "lokinet"
+    "arqnet"
   ],
   "author": "Ryan Tharp",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/loki-project/loki-network/issues"
+    "url": ""
   },
-  "homepage": "https://github.com/loki-project/loki-network#readme",
+  "homepage": "",
   "dependencies": {
     "net-ping": "^1.2.3"
   }

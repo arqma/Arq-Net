@@ -8,13 +8,13 @@ WORKDIR /src/
 COPY . /src/
 
 RUN make NINJA=ninja STATIC_LINK=ON BUILD_TYPE=Release DOWNLOAD_SODIUM=ON
-RUN ./lokinet-bootstrap ${bootstrap}
+RUN ./arqnet-bootstrap ${bootstrap}
 
 FROM alpine:latest
 
-COPY lokinet-docker.ini /root/.lokinet/lokinet.ini
-COPY --from=builder /src/build/daemon/lokinet .
-COPY --from=builder /root/.lokinet/bootstrap.signed /root/.lokinet/
+COPY arqnet-docker.ini /root/.arqnet/arqnet.ini
+COPY --from=builder /src/build/daemon/arqnet .
+COPY --from=builder /root/.arqnet/bootstrap.signed /root/.arqnet/
 
-CMD ["./lokinet"]
+CMD ["./arqnet"]
 EXPOSE 1090/udp 1190/tcp

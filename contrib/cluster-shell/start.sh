@@ -1,16 +1,16 @@
 #!/bin/bash
 set +x
-cd loki1
-nohup ./lokinet1 $PWD/lokinet.ini &
+cd arq1
+nohup ./arqnet1 $PWD/arqnet.ini &
 # seed node needs some time to write RC to make sure it's not expired on load for the rest
 sleep 1
-cd ../loki2
-nohup ./lokinet2 $PWD/lokinet.ini &
-cd ../loki3
-nohup ./lokinet3 $PWD/lokinet.ini &
-cd ../loki4
-nohup ./lokinet4 $PWD/lokinet.ini &
-cd ../loki5
-nohup ./lokinet5 $PWD/lokinet.ini &
+cd ../arq2
+nohup ./arqnet2 $PWD/arqnet.ini &
+cd ../arq3
+nohup ./arqnet3 $PWD/arqnet.ini &
+cd ../arq4
+nohup ./arqnet4 $PWD/arqnet.ini &
+cd ../arq5
+nohup ./arqnet5 $PWD/arqnet.ini &
 cd ..
-tail -f loki*/nohup.out
+tail -f arq*/nohup.out

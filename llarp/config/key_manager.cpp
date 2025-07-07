@@ -31,15 +31,15 @@ namespace llarp
     if(m_initialized)
       return false;
 
-    m_rcPath           = config.router.ourRcFile();
-    m_idKeyPath        = config.router.identKeyfile();
-    m_encKeyPath       = config.router.encryptionKeyfile();
-    m_transportKeyPath = config.router.transportKeyfile();
+    m_rcPath            = config.router.ourRcFile();
+    m_idKeyPath         = config.router.identKeyfile();
+    m_encKeyPath        = config.router.encryptionKeyfile();
+    m_transportKeyPath  = config.router.transportKeyfile();
 
-    m_usingLokid       = config.lokid.whitelistRouters;
-    m_lokidRPCAddr     = config.lokid.lokidRPCAddr;
-    m_lokidRPCUser     = config.lokid.lokidRPCUser;
-    m_lokidRPCPassword = config.lokid.lokidRPCPassword;
+    m_usingArqmad       = config.arqmad.whitelistRouters;
+    m_arqmadRPCAddr     = config.arqmad.arqmadRPCAddr;
+    m_arqmadRPCUser     = config.arqmad.arqmadRPCUser;
+    m_arqmadRPCPassword = config.arqmad.arqmadRPCPassword;
 
     RouterContact rc;
     bool exists = rc.Read(m_rcPath.c_str());
@@ -78,7 +78,7 @@ namespace llarp
       }
     }
 
-    if(not m_usingLokid)
+    if(not m_usingArqmad)
     {
       // load identity key or create if needed
       auto identityKeygen = [](llarp::SecretKey& key) {
@@ -90,7 +90,7 @@ namespace llarp
     }
     else
     {
-      if(not loadIdentityFromLokid())
+      if(not loadIdentityFromArqmad())
         return false;
     }
 
@@ -209,7 +209,7 @@ namespace llarp
   }
 
   bool
-  KeyManager::loadIdentityFromLokid()
+  KeyManager::loadIdentityFromArqmad()
   {
 #if defined(_WIN32) || defined(_WIN64)
     LogError("service node mode not supported on windows");
@@ -220,11 +220,11 @@ namespace llarp
     {
       bool ret = false;
       std::stringstream ss;
-      ss << "http://" << m_lokidRPCAddr << "/json_rpc";
+      ss << "http://" << m_arqmadRPCAddr << "/json_rpc";
       const auto url = ss.str();
       curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
       curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_ANY);
-      const auto auth = m_lokidRPCUser + ":" + m_lokidRPCPassword;
+      const auto auth = m_arqmadRPCUser + ":" + m_arqmadRPCPassword;
       curl_easy_setopt(curl, CURLOPT_USERPWD, auth.c_str());
       curl_slist* list = nullptr;
       list = curl_slist_append(list, "Content-Type: application/json");
@@ -242,7 +242,7 @@ namespace llarp
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &curl_RecvIdentKey);
 
       resp.clear();
-      LogInfo("Getting Identity Keys from lokid...");
+      LogInfo("Getting Identity Keys from arqmad...");
       if(curl_easy_perform(curl) == CURLE_OK)
       {
         try
@@ -262,11 +262,11 @@ namespace llarp
           {
             if(k.empty())
             {
-              LogError("lokid gave no identity key");
+              LogError("arqmad gave no identity key");
             }
             else
             {
-              LogError("lokid gave invalid identity key");
+              LogError("arqmad gave invalid identity key");
             }
             return false;
           }
@@ -278,12 +278,12 @@ namespace llarp
           }
           else
           {
-            LogError("lokid gave bogus identity key");
+            LogError("arqmad gave bogus identity key");
           }
         }
         catch(nlohmann::json::exception& ex)
         {
-          LogError("Bad response from lokid: ", ex.what());
+          LogError("Bad response from arqmad: ", ex.what());
         }
       }
       else
@@ -292,7 +292,7 @@ namespace llarp
       }
       if(ret)
       {
-        LogInfo("Got Identity Keys from lokid: ",
+        LogInfo("Got Identity Keys from arqmad: ",
                 RouterID(seckey_topublic(identityKey)));
       }
       curl_easy_cleanup(curl);

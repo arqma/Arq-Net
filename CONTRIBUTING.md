@@ -1,4 +1,3 @@
-[Español](CONTRIBUTING_es.md)
 # Do
 
 * Act like a responsible adult.

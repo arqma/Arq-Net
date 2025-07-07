@@ -34,12 +34,12 @@ SETCAP ?= which setcap && setcap cap_net_admin,cap_net_bind_service=+eip
 SHADOW_ROOT ?= $(HOME)/.shadow
 SHADOW_BIN=$(SHADOW_ROOT)/bin/shadow
 SHADOW_CONFIG=$(REPO)/shadow.config.xml
-SHADOW_PLUGIN=$(BUILD_ROOT)/libshadow-plugin-lokinet-shared.so
+SHADOW_PLUGIN=$(BUILD_ROOT)/libshadow-plugin-arqnet-shared.so
 SHADOW_LOG=$(REPO)/shadow.log.txt
 
 SHADOW_SRC ?= $(HOME)/local/shadow
 SHADOW_PARSE ?= $(PYTHON) $(SHADOW_SRC)/src/tools/parse-shadow.py - -m 0 --packet-data
-SHADOW_PLOT ?= $(PYTHON) $(SHADOW_SRC)/src/tools/plot-shadow.py -d $(REPO) LokiNET -c $(SHADOW_CONFIG) -r 10000 -e '.*'
+SHADOW_PLOT ?= $(PYTHON) $(SHADOW_SRC)/src/tools/plot-shadow.py -d $(REPO) ArqNET -c $(SHADOW_CONFIG) -r 10000 -e '.*'
 SHADOW_OPTS ?=
 
 LIBUV_VERSION ?= v1.30.1
@@ -50,12 +50,12 @@ LIBCURL_VERSION = 7.67.0
 LIBCURL_URL = https://github.com/curl/curl/releases/download/curl-7_67_0/curl-7.67.0.tar.xz
 LIBCURL_SHA256 = f5d2e7320379338c3952dcc7566a140abb49edb575f9f99272455785c40e536c
 
-TESTNET_ROOT=/tmp/lokinet_testnet_tmp
+TESTNET_ROOT=/tmp/arqnet_testnet_tmp
 TESTNET_CONF=$(TESTNET_ROOT)/supervisor.conf
 TESTNET_LOG=$(TESTNET_ROOT)/testnet.log
 
 TESTNET_VENV=$(TESTNET_ROOT)/v
-TESTNET_EXE=$(REPO)/lokinet-testnet
+TESTNET_EXE=$(REPO)/arqnet-testnet
 TESTNET_CLIENTS ?= 50
 TESTNET_SERVERS ?= 50
 TESTNET_DEBUG ?= 0
@@ -85,9 +85,9 @@ TOOLCHAIN ?=
 WINDOWS_ARCH ?= 64
 
 # native avx2 code
-AVX2 ?= OFF
+AVX2 ?= ON
 # statically link everything
-STATIC_LINK ?= OFF
+STATIC_LINK ?= ON
 # statically link dependencies
 STATIC ?= OFF
 # enable network namespace isolation
@@ -96,14 +96,14 @@ NETNS ?= OFF
 SHELL_HOOKS ?= OFF
 # cross compile?
 CROSS ?= OFF
-# build liblokinet-shared.so
+# build libarqnet-shared.so
 SHARED_LIB ?= OFF
 # enable generating coverage
 COVERAGE ?= OFF
 # allow downloading libsodium if >= 1.0.18 not installed
 DOWNLOAD_SODIUM ?= OFF
 
-COVERAGE_OUTDIR ?= "$(TMPDIR)/lokinet-coverage"
+COVERAGE_OUTDIR ?= "$(TMPDIR)/arqnet-coverage"
 
 # tracy profiler
 TRACY_ROOT ?=
@@ -125,7 +125,7 @@ SCAN_BUILD ?= scan-build
 
 UNAME = $(shell which uname)
 
-COMMON_CMAKE_OPTIONS = -DSTATIC_LINK_RUNTIME=$(STATIC_LINK) -DUSE_NETNS=$(NETNS) -DUSE_AVX2=$(AVX2) -DWITH_SHARED=$(SHARED_LIB) -DDOWNLOAD_SODIUM=$(DOWNLOAD_SODIUM) -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DXSAN=$(XSAN)
+COMMON_CMAKE_OPTIONS = -DCMAKE_POLICY_VERSION_MINIMUM=3.18 -DSTATIC_LINK_RUNTIME=$(STATIC_LINK) -DUSE_NETNS=$(NETNS) -DUSE_AVX2=$(AVX2) -DWITH_SHARED=$(SHARED_LIB) -DDOWNLOAD_SODIUM=$(DOWNLOAD_SODIUM) -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DXSAN=$(XSAN)
 
 ifeq ($(shell $(UNAME)),SunOS)
 CONFIG_CMD = $(shell gecho -n "cd '$(BUILD_ROOT)' && " ; gecho -n "cmake -G'$(CMAKE_GEN)' -DCMAKE_CROSSCOMPILING=$(CROSS) -DUSE_SHELLHOOKS=$(SHELL_HOOKS) $(COMMON_CMAKE_OPTIONS) '$(REPO)'")
@@ -143,9 +143,9 @@ ANALYZE_CONFIG_CMD = $(shell /bin/echo -n "cd '$(BUILD_ROOT)' && " ; /bin/echo -
 COVERAGE_CONFIG_CMD = $(shell /bin/echo -n "cd '$(BUILD_ROOT)' && " ; /bin/echo -n "cmake -G'$(CMAKE_GEN)' -DCMAKE_CROSSCOMPILING=$(CROSS) -DWITH_COVERAGE=yes $(COMMON_CMAKE_OPTIONS) '$(REPO)'")
 endif
 
-TARGETS = $(REPO)/lokinet
+TARGETS = $(REPO)/arqnet
 SIGS = $(TARGETS:=.sig)
-EXE = $(BUILD_ROOT)/daemon/lokinet
+EXE = $(BUILD_ROOT)/daemon/arqnet
 TEST_EXE = $(BUILD_ROOT)/test/testAll
 ABYSS_EXE = $(BUILD_ROOT)/abyss-main
 
@@ -174,7 +174,7 @@ release-configure: clean
 
 debug: debug-configure
 	$(MAKE) -C $(BUILD_ROOT)
-	cp $(EXE) $(REPO)/lokinet
+	cp $(EXE) $(REPO)/arqnet
 
 release-compile: release-configure
 	$(MAKE) -C $(BUILD_ROOT)
@@ -194,7 +194,7 @@ shadow-build: shadow-configure
 
 shadow-run: shadow-build
 	$(PYTHON3) $(REPO)/contrib/shadow/genconf.py $(SHADOW_CONFIG)
-	cp $(SHADOW_PLUGIN) $(REPO)/libshadow-plugin-lokinet.so
+	cp $(SHADOW_PLUGIN) $(REPO)/libshadow-plugin-arqnet.so
 	$(SHADOW_BIN) $(SHADOW_OPTS) $(SHADOW_CONFIG) | $(SHADOW_PARSE)
 
 shadow-plot: shadow-run
@@ -219,7 +219,7 @@ $(TESTNET_VENV):
 testnet: $(TESTNET_VENV)
 	cp $(EXE) $(TESTNET_EXE)
 	mkdir -p $(TESTNET_ROOT)
-	$(PYTHON3) $(REPO)/contrib/testnet/genconf.py --bin=$(TESTNET_EXE) --svc=$(TESTNET_SERVERS) --clients=$(TESTNET_CLIENTS) --dir=$(TESTNET_ROOT) --out $(TESTNET_CONF) --ifname=$(TESTNET_IFNAME) --baseport=$(TESTNET_BASEPORT) --ip=$(TESTNET_IP) --netid=$(TESTNET_NETID) --lokid='$(TESTNET_VENV)/bin/python $(REPO)/contrib/testnet/lokid.py'
+	$(PYTHON3) $(REPO)/contrib/testnet/genconf.py --bin=$(TESTNET_EXE) --svc=$(TESTNET_SERVERS) --clients=$(TESTNET_CLIENTS) --dir=$(TESTNET_ROOT) --out $(TESTNET_CONF) --ifname=$(TESTNET_IFNAME) --baseport=$(TESTNET_BASEPORT) --ip=$(TESTNET_IP) --netid=$(TESTNET_NETID) --arqmad='$(TESTNET_VENV)/bin/python $(REPO)/contrib/testnet/arqmad.py'
 	LLARP_DEBUG=$(TESTNET_DEBUG) supervisord -n -d $(TESTNET_ROOT) -l $(TESTNET_LOG) -c $(TESTNET_CONF)
 
 gtest: debug
@@ -238,7 +238,7 @@ static-configure: $(LIBUV_PREFIX) $(LIBCURL_PREFIX)
 
 static: static-configure
 	$(MAKE) -C '$(BUILD_ROOT)'
-	cp $(EXE) $(REPO)/lokinet-static
+	cp $(EXE) $(REPO)/arqnet-static
 
 $(LIBCURL_PREFIX):
 	mkdir -p '$(BUILD_ROOT)'
@@ -260,7 +260,7 @@ android-gradle-prepare: $(LIBUV_PREFIX)
 	rm -f $(ANDROID_LOCAL_PROPS)
 	echo "#auto generated don't modify kthnx" >> $(ANDROID_PROPS)
 	echo "libuvsrc=$(LIBUV_PREFIX)" >> $(ANDROID_PROPS)
-	echo "lokinetCMake=$(REPO)/CMakeLists.txt" >> $(ANDROID_PROPS)
+	echo "arqnetCMake=$(REPO)/CMakeLists.txt" >> $(ANDROID_PROPS)
 	echo "org.gradle.parallel=true" >> $(ANDROID_PROPS)
 	echo "org.gradle.jvmargs=-Xmx1536M" >> $(ANDROID_PROPS)
 	echo "#auto generated don't modify kthnx" >> $(ANDROID_LOCAL_PROPS)
@@ -279,7 +279,7 @@ windows-debug-configure: $(LIBUV_PREFIX)
 
 windows-debug: windows-debug-configure
 	$(MAKE) -C '$(BUILD_ROOT)'
-	cp '$(BUILD_ROOT)/daemon/lokinet.exe' '$(REPO)/lokinet.exe'
+	cp '$(BUILD_ROOT)/daemon/arqnet.exe' '$(REPO)/arqnet.exe'
 
 windows-release-configure: $(LIBUV_PREFIX)
 	mkdir -p '$(BUILD_ROOT)'
@@ -328,7 +328,7 @@ coverage: coverage-config
 	test x$(CROSS) = xOFF && $(MAKE) -C $(BUILD_ROOT) check || true # continue even if tests fail
 	mkdir -p "$(COVERAGE_OUTDIR)"
 ifeq ($(CLANG),OFF)
-	gcovr -r . --branches --html --html-details -o "$(COVERAGE_OUTDIR)/lokinet.html"
+	gcovr -r . --branches --html --html-details -o "$(COVERAGE_OUTDIR)/arqnet.html"
 else
 	llvm-profdata merge default.profraw -output $(BUILD_ROOT)/profdata
 	llvm-cov show -format=html -output-dir="$(COVERAGE_OUTDIR)" -instr-profile "$(BUILD_ROOT)/profdata" "$(BUILD_ROOT)/testAll" $(shell find ./llarp -type f)
@@ -340,12 +340,12 @@ lint: $(LINT_CHECK)
 	clang-tidy $^ -- -I$(REPO)/include -I$(REPO)/crypto/include -I$(REPO)/llarp -I$(REPO)/vendor/cppbackport-master/lib
 
 docker-kubernetes:
-	docker build -f docker/loki-svc-kubernetes.Dockerfile .
+	docker build -f docker/arqma-svc-kubernetes.Dockerfile .
 
-install-pylokinet:
-	cd $(REPO)/contrib/py/pylokinet && $(PYTHON3) setup.py install
+install-pyarqnet:
+	cd $(REPO)/contrib/py/pyarqnet && $(PYTHON3) setup.py install
 
-kubernetes-install: install install-pylokinet
+kubernetes-install: install install-pyarqnet
 
 docker-debian:
 	docker build -f docker/debian.Dockerfile .
@@ -359,7 +359,7 @@ debian-configure:
 
 debian: debian-configure
 	$(MAKE) -C '$(BUILD_ROOT)'
-	cp $(EXE) lokinet
+	cp $(EXE) arqnet
 
 debian-test:
 	test x$(CROSS) = xOFF && $(MAKE) -C $(BUILD_ROOT) check || test x$(CROSS) = xON

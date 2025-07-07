@@ -1,7 +1,8 @@
-LokiNET is the reference implementation of LLARP (Low Latency Anonymous
-Routing Protocol); this distribution of LokiNET and the Lokinet control
+ArqNET is the reference implementation of LLARP (Low Latency Anonymous
+Routing Protocol); this distribution of ArqNET and the Arqnet control
 panel is licensed under the GNU General Public License, version 3.
 
+Copyright (c)      2025 The Arqma Network
 Copyright (c) 2018-2020 The Loki Project
 Copyright (c) 2018-2020 Jeff Becker
 Windows NT port and portions Copyright (c) 2018-2020 Rick V.

@@ -1,5 +1,5 @@
-#ifndef LOKINET_BOOTSERV_CONFIG_HPP
-#define LOKINET_BOOTSERV_CONFIG_HPP
+#ifndef ARQNET_BOOTSERV_CONFIG_HPP
+#define ARQNET_BOOTSERV_CONFIG_HPP
 
 #include <util/string_view.hpp>
 
