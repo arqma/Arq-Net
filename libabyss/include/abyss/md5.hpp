@@ -3,6 +3,7 @@
 #include <array>
 #include <algorithm>
 #include <string>
+#include <cstdint>
 
 struct MD5
 {

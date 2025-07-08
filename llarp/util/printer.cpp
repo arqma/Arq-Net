@@ -1,6 +1,7 @@
 #include <util/printer.hpp>
 
 #include <cctype>
+#include <cstdint>
 
 namespace llarp
 {
