@@ -135,12 +135,27 @@ jobs:
           make -j$(nproc)
           make install
 
-      - name: Debug .pc files and MinGW pkg-config
+      - name: Debug MinGW libs & pkg-config
         run: |
-          ls -l $HOME/mingw-libsodium/lib/pkgconfig
-          cat $HOME/mingw-libsodium/lib/pkgconfig/libsodium.pc
+          echo "==== WHICH PKG-CONFIG ===="
           which x86_64-w64-mingw32-pkg-config || true
+          which pkg-config || true
+          echo "==== .pc FILES IN SODIUM ===="
+          ls -l $HOME/mingw-libsodium/lib/pkgconfig || true
+          echo "==== LIBSODIUM.PC ===="
+          cat $HOME/mingw-libsodium/lib/pkgconfig/libsodium.pc || true
+          echo "==== .pc FILES IN CURL ===="
+          ls -l $HOME/mingw-libcurl/lib/pkgconfig || true
+          echo "==== .pc FILES IN LIBUV ===="
+          ls -l $HOME/mingw-libuv/lib/pkgconfig || true
+          echo "==== TEST PKG-CONFIG (cross) ===="
           x86_64-w64-mingw32-pkg-config --modversion libsodium || true
+          x86_64-w64-mingw32-pkg-config --modversion libcurl || true
+          x86_64-w64-mingw32-pkg-config --modversion libuv || true
+          echo "==== TEST PKG-CONFIG (plain) ===="
+          PKG_CONFIG_PATH=$HOME/mingw-libsodium/lib/pkgconfig pkg-config --modversion libsodium || true
+          PKG_CONFIG_PATH=$HOME/mingw-libcurl/lib/pkgconfig pkg-config --modversion libcurl || true
+          PKG_CONFIG_PATH=$HOME/mingw-libuv/lib/pkgconfig pkg-config --modversion libuv || true
 
       - name: Set PKG_CONFIG_PATH for MinGW libs
         run: echo "PKG_CONFIG_PATH=$HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig" >> $GITHUB_ENV
@@ -153,6 +168,6 @@ jobs:
           LIBCURL_ROOT: $HOME/mingw-libcurl
           LIBUV_ROOT: $HOME/mingw-libuv
         run: |
-          which x86_64-w64-mingw32-pkg-config
-          x86_64-w64-mingw32-pkg-config --modversion libsodium
+          which x86_64-w64-mingw32-pkg-config || true
+          x86_64-w64-mingw32-pkg-config --modversion libsodium || true
           make windows-release
