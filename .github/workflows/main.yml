@@ -27,8 +27,7 @@ jobs:
           sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config libsystemd-dev
 
       - name: Check LibUV version
-        run: |
-          pkg-config --modversion libuv || true
+        run: pkg-config --modversion libuv || true
 
       - name: Build (make)
         run: make
@@ -52,8 +51,7 @@ jobs:
           sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config
 
       - name: Check LibUV version
-        run: |
-          pkg-config --modversion libuv || true
+        run: pkg-config --modversion libuv || true
 
       - name: Clean build directory
         run: rm -rf build/
@@ -62,19 +60,6 @@ jobs:
         run: |
           cmake -S . -B build -DWITH_SYSTEMD=OFF -DSTATIC_LINK=ON
           cmake --build build --target arqnet-static
-
-      # Jeśli libuv1-dev nie zadziałał, odkomentuj poniższe kroki
-      # - name: Build LibUV from source (if system libuv fails)
-      #   run: |
-      #     wget https://dist.libuv.org/dist/v1.44.2/libuv-v1.44.2.tar.gz
-      #     tar xzf libuv-v1.44.2.tar.gz
-      #     cd libuv-v1.44.2
-      #     sh autogen.sh
-      #     ./configure --prefix=$HOME/libuv
-      #     make -j$(nproc)
-      #     make install
-      # - name: Set PKG_CONFIG_PATH for LibUV
-      #   run: echo "PKG_CONFIG_PATH=$HOME/libuv/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
   windows-build:
     runs-on: ${{ matrix.ubuntu }}
@@ -109,7 +94,7 @@ jobs:
           make -j$(nproc)
           make install
 
-      - name: Build libcurl for MinGW (bez SSL)
+      - name: Build libcurl for MinGW (no SSL)
         run: |
           wget https://curl.se/download/curl-7.82.0.tar.gz
           tar xzf curl-7.82.0.tar.gz
@@ -126,23 +111,23 @@ jobs:
           make -j$(nproc)
           make install
 
-
-       - name: Build libuv for MinGW
-         run: |
-           wget https://dist.libuv.org/dist/v1.44.2/libuv-v1.44.2.tar.gz
-           tar xzf libuv-v1.44.2.tar.gz
-           cd libuv-v1.44.2
-           export CC=x86_64-w64-mingw32-gcc
-           export CXX=x86_64-w64-mingw32-g++
-           ./autogen.sh
-           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libuv --disable-shared --enable-static
-           make -j$(nproc)
-           make install
+      - name: Build libuv for MinGW
+        run: |
+          wget https://dist.libuv.org/dist/v1.44.2/libuv-v1.44.2.tar.gz
+          tar xzf libuv-v1.44.2.tar.gz
+          cd libuv-v1.44.2
+          export CC=x86_64-w64-mingw32-gcc
+          export CXX=x86_64-w64-mingw32-g++
+          ./autogen.sh
+          ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libuv --disable-shared --enable-static
+          make -j$(nproc)
+          make install
 
       - name: Build for Windows (make windows-release)
         env:
-          PKG_CONFIG_PATH: $HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig
+          PKG_CONFIG_PATH: $HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig
           PKG_CONFIG: x86_64-w64-mingw32-pkg-config
           LIBSODIUM_ROOT: $HOME/mingw-libsodium
           LIBCURL_ROOT: $HOME/mingw-libcurl
+          LIBUV_ROOT: $HOME/mingw-libuv
         run: make windows-release
