@@ -47,10 +47,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config
 
-      - name: Static Build (bez systemd)
+      - name: Clean build directory
+        run: rm -rf build/
+
+      - name: Static Build (CMake, bez systemd)
         run: |
           cmake -S . -B build -DWITH_SYSTEMD=OFF -DSTATIC_LINK=ON
-          cmake --build build --target static
+          cmake --build build --target arqnet-static
 
   windows-build:
     runs-on: ${{ matrix.ubuntu }}
@@ -68,7 +71,7 @@ jobs:
       - name: Install dependencies (Windows cross-compile)
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool
+          sudo apt-get install -y build-essential cmake git pkg-config pkg-config-mingw-w64 mingw-w64 nsis autoconf automake libtool
 
       - name: Build libsodium for MinGW
         run: |
@@ -85,7 +88,7 @@ jobs:
           make -j$(nproc)
           make install
 
-      - name: Build libcurl for MinGW (bez SSL)
+      - name: Build libcurl for MinGW (no SSL)
         run: |
           wget https://curl.se/download/curl-7.82.0.tar.gz
           tar xzf curl-7.82.0.tar.gz
@@ -105,6 +108,7 @@ jobs:
       - name: Build for Windows (make windows-release)
         env:
           PKG_CONFIG_PATH: $HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig
+          PKG_CONFIG: x86_64-w64-mingw32-pkg-config
           LIBSODIUM_ROOT: $HOME/mingw-libsodium
           LIBCURL_ROOT: $HOME/mingw-libcurl
         run: make windows-release
