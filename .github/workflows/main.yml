@@ -48,10 +48,20 @@ jobs:
       - name: Install dependencies (Static Linux)
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config
+          sudo apt-get install -y build-essential cmake git libcap-dev curl libsodium-dev libcurl4-openssl-dev pkg-config
 
-      - name: Check LibUV version
-        run: pkg-config --modversion libuv || true
+      - name: Build libuv from source (Linux static)
+        run: |
+          wget https://dist.libuv.org/dist/v1.44.2/libuv-v1.44.2.tar.gz
+          tar xzf libuv-v1.44.2.tar.gz
+          cd libuv-v1.44.2
+          sh autogen.sh
+          ./configure --prefix=$HOME/libuv --disable-shared --enable-static
+          make -j$(nproc)
+          make install
+
+      - name: Set PKG_CONFIG_PATH for libuv
+        run: echo "PKG_CONFIG_PATH=$HOME/libuv/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
       - name: Clean build directory
         run: rm -rf build/
@@ -94,7 +104,7 @@ jobs:
           make -j$(nproc)
           make install
 
-      - name: Build libcurl for MinGW (no SSL)
+      - name: Build libcurl for MinGW (bez SSL)
         run: |
           wget https://curl.se/download/curl-7.82.0.tar.gz
           tar xzf curl-7.82.0.tar.gz
@@ -122,6 +132,9 @@ jobs:
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libuv --disable-shared --enable-static
           make -j$(nproc)
           make install
+
+      - name: Set PKG_CONFIG_PATH for MinGW libs
+        run: echo "PKG_CONFIG_PATH=$HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig" >> $GITHUB_ENV
 
       - name: Build for Windows (make windows-release)
         env:
