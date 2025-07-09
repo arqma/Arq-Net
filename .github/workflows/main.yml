@@ -2,11 +2,9 @@ name: Build Arq-Net Linux & Windows
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
   pull_request:
-    branches:
-      - master
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
@@ -47,10 +45,12 @@ jobs:
       - name: Install dependencies (Static Linux)
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config libsystemd-dev
+          sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config
 
-      - name: Static Build (make static STATIC_LINK=ON)
-        run: make static STATIC_LINK=ON WITH_SYSTEMD=OFF
+      - name: Static Build (bez systemd)
+        run: |
+          cmake -S . -B build -DWITH_SYSTEMD=OFF -DSTATIC_LINK=ON
+          cmake --build build --target static
 
   windows-build:
     runs-on: ${{ matrix.ubuntu }}
@@ -68,7 +68,7 @@ jobs:
       - name: Install dependencies (Windows cross-compile)
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool libsystemd-dev
+          sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool
 
       - name: Build libsodium for MinGW
         run: |
@@ -90,6 +90,13 @@ jobs:
           wget https://curl.se/download/curl-7.82.0.tar.gz
           tar xzf curl-7.82.0.tar.gz
           cd curl-7.82.0
+          export CC=x86_64-w64-mingw32-gcc
+          export CXX=x86_64-w64-mingw32-g++
+          export AR=x86_64-w64-mingw32-ar
+          export RANLIB=x86_64-w64-mingw32-ranlib
+          export STRIP=x86_64-w64-mingw32-strip
+          export LD=x86_64-w64-mingw32-ld
+          PKG_CONFIG_PATH="$HOME/mingw-libsodium/lib/pkgconfig"
           ./buildconf
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libcurl --with-sodium=$HOME/mingw-libsodium --disable-shared --enable-static --without-ssl
           make -j$(nproc)
@@ -97,6 +104,7 @@ jobs:
 
       - name: Build for Windows (make windows-release)
         env:
+          PKG_CONFIG_PATH: $HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig
           LIBSODIUM_ROOT: $HOME/mingw-libsodium
           LIBCURL_ROOT: $HOME/mingw-libcurl
         run: make windows-release
