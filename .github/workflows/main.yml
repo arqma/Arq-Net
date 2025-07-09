@@ -82,19 +82,13 @@ jobs:
       - name: Install dependencies (Windows cross-compile)
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool
+          sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool curl wget gettext-base
 
       - name: Build libsodium for MinGW
         run: |
           wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz
           tar xzf libsodium-1.0.18.tar.gz
           cd libsodium-1.0.18
-          export CC=x86_64-w64-mingw32-gcc
-          export CXX=x86_64-w64-mingw32-g++
-          export AR=x86_64-w64-mingw32-ar
-          export RANLIB=x86_64-w64-mingw32-ranlib
-          export STRIP=x86_64-w64-mingw32-strip
-          export LD=x86_64-w64-mingw32-ld
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libsodium --disable-shared --enable-static
           make -j$(nproc)
           make install
@@ -104,14 +98,8 @@ jobs:
           wget https://curl.se/download/curl-7.82.0.tar.gz
           tar xzf curl-7.82.0.tar.gz
           cd curl-7.82.0
-          export CC=x86_64-w64-mingw32-gcc
-          export CXX=x86_64-w64-mingw32-g++
-          export AR=x86_64-w64-mingw32-ar
-          export RANLIB=x86_64-w64-mingw32-ranlib
-          export STRIP=x86_64-w64-mingw32-strip
-          export LD=x86_64-w64-mingw32-ld
           PKG_CONFIG_PATH="$HOME/mingw-libsodium/lib/pkgconfig"
-          ./buildconf
+          ./buildconf || true
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libcurl --with-sodium=$HOME/mingw-libsodium --disable-shared --enable-static --without-ssl
           make -j$(nproc)
           make install
@@ -121,16 +109,32 @@ jobs:
           wget https://dist.libuv.org/dist/v1.44.2/libuv-v1.44.2.tar.gz
           tar xzf libuv-v1.44.2.tar.gz
           cd libuv-v1.44.2
-          export CC=x86_64-w64-mingw32-gcc
-          export CXX=x86_64-w64-mingw32-g++
-          ./autogen.sh
+          sh autogen.sh
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libuv --disable-shared --enable-static
           make -j$(nproc)
           make install
 
+      - name: Show built libraries for debugging
+        run: |
+          echo "libsodium:"
+          ls -lh $HOME/mingw-libsodium/lib/
+          echo "libcurl:"
+          ls -lh $HOME/mingw-libcurl/lib/
+          echo "libuv:"
+          ls -lh $HOME/mingw-libuv/lib/
+          echo "PC Files:"
+          ls -lh $HOME/mingw-libsodium/lib/pkgconfig/ $HOME/mingw-libcurl/lib/pkgconfig/ $HOME/mingw-libuv/lib/pkgconfig/
+
       - name: Set PKG_CONFIG_PATH for MinGW build
         run: |
           echo "PKG_CONFIG_PATH=$HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+
+      - name: Debug pkg-config for MinGW
+        run: |
+          which x86_64-w64-mingw32-pkg-config || echo "NO PKG-CONFIG"
+          x86_64-w64-mingw32-pkg-config --modversion libsodium || true
+          x86_64-w64-mingw32-pkg-config --modversion libuv || true
+          x86_64-w64-mingw32-pkg-config --modversion libcurl || true
 
       - name: Build for Windows (make windows-release)
         env:
