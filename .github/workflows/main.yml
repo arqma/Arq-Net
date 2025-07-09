@@ -20,12 +20,15 @@ jobs:
         with:
           ref: master
           submodules: 'recursive'
+
       - name: Install dependencies (Linux)
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config libsystemd-dev
+
       - name: Check LibUV version
         run: pkg-config --modversion libuv || true
+
       - name: Build (make)
         run: make
 
@@ -41,33 +44,37 @@ jobs:
         with:
           ref: master
           submodules: 'recursive'
+
       - name: Install dependencies (Static Linux)
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake git libcap-dev curl libsodium-dev libcurl4-openssl-dev pkg-config
-      - name: Build libuv from source (Linux static)
+
+      - name: Build static LibUV
         run: |
           wget https://dist.libuv.org/dist/v1.44.2/libuv-v1.44.2.tar.gz
           tar xzf libuv-v1.44.2.tar.gz
           cd libuv-v1.44.2
           sh autogen.sh
-          ./configure --prefix=$HOME/libuv --disable-shared --enable-static
+          ./configure --prefix=$HOME/libuv-static --disable-shared --enable-static
           make -j$(nproc)
           make install
-      - name: Debug PKG_CONFIG_PATH for libuv
+
+      - name: Debug LibUV files
         run: |
-          echo "PKG_CONFIG_PATH=$HOME/libuv/lib/pkgconfig"
-          ls -lh $HOME/libuv/lib/
-          ls -lh $HOME/libuv/include/
-          cat $HOME/libuv/lib/pkgconfig/libuv.pc || true
-          PKG_CONFIG_PATH=$HOME/libuv/lib/pkgconfig pkg-config --modversion libuv || true
-      - name: Clean build directory
-        run: rm -rf build/
-      - name: Static Build (CMake, bez systemd)
+          find $HOME/libuv-static
+          ls -l $HOME/libuv-static/lib
+          cat $HOME/libuv-static/lib/pkgconfig/libuv.pc || true
+
+      - name: Set PKG_CONFIG_PATH for static LibUV
+        run: echo "PKG_CONFIG_PATH=$HOME/libuv-static/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+
+      - name: Static Build (CMake, z lokalnym libuv)
         env:
-          PKG_CONFIG_PATH: $HOME/libuv/lib/pkgconfig:$PKG_CONFIG_PATH
+          PKG_CONFIG_PATH: $HOME/libuv-static/lib/pkgconfig:$PKG_CONFIG_PATH
+          LIBUV_ROOT: $HOME/libuv-static
         run: |
-          cmake -S . -B build -DWITH_SYSTEMD=OFF -DSTATIC_LINK=ON
+          cmake -S . -B build -DWITH_SYSTEMD=OFF -DSTATIC_LINK=ON -DLIBUV_ROOT=$HOME/libuv-static
           cmake --build build --target arqnet-static
 
   windows-build:
@@ -82,10 +89,12 @@ jobs:
         with:
           ref: master
           submodules: 'recursive'
+
       - name: Install dependencies (Windows cross-compile)
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool
+
       - name: Build libsodium for MinGW
         run: |
           wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz
@@ -100,6 +109,7 @@ jobs:
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libsodium --disable-shared --enable-static
           make -j$(nproc)
           make install
+
       - name: Build libcurl for MinGW (bez SSL)
         run: |
           wget https://curl.se/download/curl-7.82.0.tar.gz
@@ -116,26 +126,25 @@ jobs:
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libcurl --with-sodium=$HOME/mingw-libsodium --disable-shared --enable-static --without-ssl
           make -j$(nproc)
           make install
+
       - name: Build libuv for MinGW
         run: |
           wget https://dist.libuv.org/dist/v1.44.2/libuv-v1.44.2.tar.gz
           tar xzf libuv-v1.44.2.tar.gz
           cd libuv-v1.44.2
-          sh autogen.sh
           export CC=x86_64-w64-mingw32-gcc
           export CXX=x86_64-w64-mingw32-g++
+          ./autogen.sh
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libuv --disable-shared --enable-static
           make -j$(nproc)
           make install
-      - name: Debug PKG_CONFIG_PATH for MinGW libs
+
+      - name: Check MinGW libs
         run: |
-          echo "PKG_CONFIG_PATH=$HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig"
-          ls -lh $HOME/mingw-libsodium/lib/
-          ls -lh $HOME/mingw-libcurl/lib/
-          ls -lh $HOME/mingw-libuv/lib/
-          PKG_CONFIG_PATH=$HOME/mingw-libsodium/lib/pkgconfig x86_64-w64-mingw32-pkg-config --modversion libsodium || true
-          PKG_CONFIG_PATH=$HOME/mingw-libcurl/lib/pkgconfig x86_64-w64-mingw32-pkg-config --modversion libcurl || true
-          PKG_CONFIG_PATH=$HOME/mingw-libuv/lib/pkgconfig x86_64-w64-mingw32-pkg-config --modversion libuv || true
+          find $HOME/mingw-libsodium
+          find $HOME/mingw-libcurl
+          find $HOME/mingw-libuv
+
       - name: Build for Windows (make windows-release)
         env:
           PKG_CONFIG_PATH: $HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig
