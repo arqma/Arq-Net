@@ -61,7 +61,7 @@ jobs:
         run: |
           echo "PKG_CONFIG_PATH=$HOME/libuv-static/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
-      - name: Static Build (CMake, bez systemd)
+      - name: Static Build (CMake, without systemd)
         run: |
           cmake -S . -B build -DWITH_SYSTEMD=OFF -DSTATIC_LINK=ON
           cmake --build build --target arqnet-static
@@ -82,7 +82,8 @@ jobs:
       - name: Install dependencies (Windows cross-compile)
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool curl wget gettext-base
+          # Install MinGW-w64 and tools, including pkg-config wrapper
+          sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool curl wget gettext-base mingw-w64-tools
 
       - name: Build libsodium for MinGW
         run: |
@@ -93,7 +94,7 @@ jobs:
           make -j$(nproc)
           make install
 
-      - name: Build libcurl for MinGW (bez SSL)
+      - name: Build libcurl for MinGW (without SSL)
         run: |
           wget https://curl.se/download/curl-7.82.0.tar.gz
           tar xzf curl-7.82.0.tar.gz
@@ -104,11 +105,14 @@ jobs:
           make -j$(nproc)
           make install
 
-      - name: Build libuv for MinGW
+      - name: Build libuv for MinGW (with patch for TCP_INITIAL_RTO_PARAMETERS)
         run: |
           wget https://dist.libuv.org/dist/v1.44.2/libuv-v1.44.2.tar.gz
           tar xzf libuv-v1.44.2.tar.gz
           cd libuv-v1.44.2
+          # Patch to avoid TCP_INITIAL_RTO_PARAMETERS redefinition conflict
+          sed -i 's|typedef struct _TCP_INITIAL_RTO_PARAMETERS {|#ifndef TCP_INITIAL_RTO_PARAMETERS\n&|' src/win/winapi.h
+          sed -i '/} TCP_INITIAL_RTO_PARAMETERS, \*PTCP_INITIAL_RTO_PARAMETERS;/a #endif' src/win/winapi.h
           sh autogen.sh
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libuv --disable-shared --enable-static
           make -j$(nproc)
@@ -132,6 +136,7 @@ jobs:
       - name: Set MinGW pkg-config in ENV
         run: echo "PKG_CONFIG=x86_64-w64-mingw32-pkg-config" >> $GITHUB_ENV
 
+      # Debug step: Check if MinGW pkg-config works and print versions
       - name: Debug pkg-config for MinGW
         run: |
           which x86_64-w64-mingw32-pkg-config || echo "NO PKG-CONFIG"
