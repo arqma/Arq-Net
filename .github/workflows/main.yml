@@ -57,14 +57,23 @@ jobs:
           make -j$(nproc)
           make install
 
-      - name: Set PKG_CONFIG_PATH for static LibUV
-        run: echo "PKG_CONFIG_PATH=$HOME/libuv-static/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+      - name: Debug LibUV visibility
+        run: |
+          ls -lh $HOME/libuv-static/lib/
+          ls -lh $HOME/libuv-static/lib/pkgconfig/
+          cat $HOME/libuv-static/lib/pkgconfig/libuv.pc
+          PKG_CONFIG_PATH=$HOME/libuv-static/lib/pkgconfig pkg-config --modversion libuv || true
 
-      - name: Static Build (CMake, z PKG_CONFIG_PATH)
+      - name: Static Build (CMake, forced LibUV)
         env:
           PKG_CONFIG_PATH: $HOME/libuv-static/lib/pkgconfig:$PKG_CONFIG_PATH
         run: |
-          cmake -S . -B build -DWITH_SYSTEMD=OFF -DSTATIC_LINK=ON
+          cmake -S . -B build \
+            -DWITH_SYSTEMD=OFF \
+            -DSTATIC_LINK=ON \
+            -DLIBUV_ROOT=$HOME/libuv-static \
+            -DLIBUV_LIBRARY=$HOME/libuv-static/lib/libuv.a \
+            -DLIBUV_INCLUDE_DIR=$HOME/libuv-static/include
           cmake --build build --target arqnet-static
 
   windows-build:
@@ -95,6 +104,7 @@ jobs:
           export AR=x86_64-w64-mingw32-ar
           export RANLIB=x86_64-w64-mingw32-ranlib
           export STRIP=x86_64-w64-mingw32-strip
+          export LD=x86_64-w64-mingw32-ld
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libsodium --disable-shared --enable-static
           make -j$(nproc)
           make install
@@ -109,6 +119,7 @@ jobs:
           export AR=x86_64-w64-mingw32-ar
           export RANLIB=x86_64-w64-mingw32-ranlib
           export STRIP=x86_64-w64-mingw32-strip
+          export LD=x86_64-w64-mingw32-ld
           ./buildconf
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libcurl --with-sodium=$HOME/mingw-libsodium --disable-shared --enable-static --without-ssl
           make -j$(nproc)
@@ -126,8 +137,14 @@ jobs:
           make -j$(nproc)
           make install
 
-      - name: Set PKG_CONFIG_PATH for MinGW static libs
-        run: echo "PKG_CONFIG_PATH=$HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+      - name: Debug all MinGW static libs
+        run: |
+          ls -lh $HOME/mingw-libsodium/lib/
+          ls -lh $HOME/mingw-libcurl/lib/
+          ls -lh $HOME/mingw-libuv/lib/
+          ls -lh $HOME/mingw-libsodium/lib/pkgconfig/
+          ls -lh $HOME/mingw-libcurl/lib/pkgconfig/
+          ls -lh $HOME/mingw-libuv/lib/pkgconfig/
 
       - name: Build for Windows (make windows-release)
         env:
@@ -136,9 +153,9 @@ jobs:
           LIBSODIUM_ROOT: $HOME/mingw-libsodium
           LIBCURL_ROOT: $HOME/mingw-libcurl
           LIBUV_ROOT: $HOME/mingw-libuv
+          LIBUV_LIBRARY: $HOME/mingw-libuv/lib/libuv.a
+          LIBUV_INCLUDE_DIR: $HOME/mingw-libuv/include
         run: |
-          which x86_64-w64-mingw32-pkg-config
-          x86_64-w64-mingw32-pkg-config --modversion libsodium
-          x86_64-w64-mingw32-pkg-config --modversion libuv
-          x86_64-w64-mingw32-pkg-config --modversion libcurl
+          which x86_64-w64-mingw32-pkg-config || true
+          x86_64-w64-mingw32-pkg-config --modversion libsodium || true
           make windows-release
