@@ -9,7 +9,7 @@
 #define LLARP_DEFAULT_NETID "arqnet"
 
 #ifndef LLARP_RELEASE_MOTTO
-#define LLARP_RELEASE_MOTTO "(dev build)"
+#define LLARP_RELEASE_MOTTO ""
 #endif
 
 #if defined(_WIN32) && defined(RC_INVOKED)
