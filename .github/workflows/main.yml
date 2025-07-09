@@ -1,0 +1,84 @@
+name: Build Arq-Net Linux & Windows
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  linux-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          submodules: 'recursive'
+
+      - name: Install dependencies (Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config libsystemd-dev
+
+      - name: Build (make)
+        run: make
+
+  static-linux-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          submodules: 'recursive'
+
+      - name: Install dependencies (Static Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config libsystemd-dev
+
+      - name: Static Build (make static STATIC_LINK=ON)
+        run: make static STATIC_LINK=ON
+
+  windows-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          submodules: 'recursive'
+
+      - name: Install dependencies (Windows cross-compile)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool
+
+      - name: Build libsodium for MinGW
+        run: |
+          wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz
+          tar xzf libsodium-1.0.18.tar.gz
+          cd libsodium-1.0.18
+          ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libsodium
+          make -j$(nproc)
+          make install
+
+      - name: Build libcurl for MinGW
+        run: |
+          wget https://curl.se/download/curl-7.82.0.tar.gz
+          tar xzf curl-7.82.0.tar.gz
+          cd curl-7.82.0
+          ./buildconf
+          ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libcurl --with-sodium=$HOME/mingw-libsodium --disable-shared --enable-static --without-zlib
+          make -j$(nproc)
+          make install
+
+      - name: Build for Windows (make windows-release)
+        env:
+          LIBSODIUM_ROOT: $HOME/mingw-libsodium
+          LIBCURL_ROOT: $HOME/mingw-libcurl
+        run: make windows-release
