@@ -11,7 +11,11 @@ on:
 
 jobs:
   linux-build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.ubuntu }}
+    strategy:
+      matrix:
+        ubuntu: [ubuntu-22.04, ubuntu-24.04]
+    name: Linux build (${{ matrix.ubuntu }})
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,7 +32,11 @@ jobs:
         run: make
 
   static-linux-build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.ubuntu }}
+    strategy:
+      matrix:
+        ubuntu: [ubuntu-22.04, ubuntu-24.04]
+    name: Static Linux build (${{ matrix.ubuntu }})
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,7 +53,11 @@ jobs:
         run: make static STATIC_LINK=ON
 
   windows-build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.ubuntu }}
+    strategy:
+      matrix:
+        ubuntu: [ubuntu-22.04, ubuntu-24.04]
+    name: Windows cross-build (${{ matrix.ubuntu }})
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -67,13 +79,13 @@ jobs:
           make -j$(nproc)
           make install
 
-      - name: Build libcurl for MinGW
+      - name: Build libcurl for MinGW (bez SSL)
         run: |
           wget https://curl.se/download/curl-7.82.0.tar.gz
           tar xzf curl-7.82.0.tar.gz
           cd curl-7.82.0
           ./buildconf
-          ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libcurl --with-sodium=$HOME/mingw-libsodium --disable-shared --enable-static --without-zlib
+          ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libcurl --with-sodium=$HOME/mingw-libsodium --disable-shared --enable-static --without-ssl
           make -j$(nproc)
           make install
 
