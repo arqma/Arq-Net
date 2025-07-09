@@ -22,7 +22,7 @@ DESTDIR ?=
 CC ?= cc
 CXX ?= c++
 
-BUILD_TYPE ?= Debug
+BUILD_TYPE ?= Release
 
 PYTHON ?= python
 PYTHON3 ?= python3
@@ -42,13 +42,13 @@ SHADOW_PARSE ?= $(PYTHON) $(SHADOW_SRC)/src/tools/parse-shadow.py - -m 0 --packe
 SHADOW_PLOT ?= $(PYTHON) $(SHADOW_SRC)/src/tools/plot-shadow.py -d $(REPO) ArqNET -c $(SHADOW_CONFIG) -r 10000 -e '.*'
 SHADOW_OPTS ?=
 
-LIBUV_VERSION ?= v1.30.1
+LIBUV_VERSION ?= v1.41.0
 LIBUV_PREFIX = $(BUILD_ROOT)/libuv
 
 LIBCURL_PREFIX = $(BUILD_ROOT)/curl
-LIBCURL_VERSION = 7.67.0
-LIBCURL_URL = https://github.com/curl/curl/releases/download/curl-7_67_0/curl-7.67.0.tar.xz
-LIBCURL_SHA256 = f5d2e7320379338c3952dcc7566a140abb49edb575f9f99272455785c40e536c
+LIBCURL_VERSION = 7.82.0
+LIBCURL_URL = https://github.com/curl/curl/releases/download/curl-7_82_0/curl-7.82.0.tar.xz
+LIBCURL_SHA256 = 0aaa12d7bd04b0966254f2703ce80dd5c38dbbd76af0297d3d690cdce58a583c
 
 TESTNET_ROOT=/tmp/arqnet_testnet_tmp
 TESTNET_CONF=$(TESTNET_ROOT)/supervisor.conf
@@ -89,7 +89,7 @@ AVX2 ?= ON
 # statically link everything
 STATIC_LINK ?= ON
 # statically link dependencies
-STATIC ?= OFF
+STATIC ?= ON
 # enable network namespace isolation
 NETNS ?= OFF
 # enable shell hooks callbacks
@@ -125,7 +125,7 @@ SCAN_BUILD ?= scan-build
 
 UNAME = $(shell which uname)
 
-COMMON_CMAKE_OPTIONS = -DCMAKE_POLICY_VERSION_MINIMUM=3.18 -DSTATIC_LINK_RUNTIME=$(STATIC_LINK) -DUSE_NETNS=$(NETNS) -DUSE_AVX2=$(AVX2) -DWITH_SHARED=$(SHARED_LIB) -DDOWNLOAD_SODIUM=$(DOWNLOAD_SODIUM) -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DXSAN=$(XSAN)
+COMMON_CMAKE_OPTIONS = -DSTATIC_LINK_RUNTIME=$(STATIC_LINK) -DUSE_NETNS=$(NETNS) -DUSE_AVX2=$(AVX2) -DWITH_SHARED=$(SHARED_LIB) -DDOWNLOAD_SODIUM=$(DOWNLOAD_SODIUM) -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DXSAN=$(XSAN)
 
 ifeq ($(shell $(UNAME)),SunOS)
 CONFIG_CMD = $(shell gecho -n "cd '$(BUILD_ROOT)' && " ; gecho -n "cmake -G'$(CMAKE_GEN)' -DCMAKE_CROSSCOMPILING=$(CROSS) -DUSE_SHELLHOOKS=$(SHELL_HOOKS) $(COMMON_CMAKE_OPTIONS) '$(REPO)'")

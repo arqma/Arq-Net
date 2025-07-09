@@ -36,12 +36,18 @@ add_library(${UTIL_LIB} STATIC ${LIB_UTIL_SRC})
 
 add_dependencies(${UTIL_LIB} genversion)
 
+if(NOT WIN32)
+  find_package(CURL REQUIRED)
+endif()
 target_include_directories(${UTIL_LIB} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include ${CURL_INCLUDE_DIRS})
 if(ANDROID)
   set(LOG_LIB log)
 endif()
 
-target_link_libraries(${UTIL_LIB} PUBLIC ${CRYPTOGRAPHY_LIB} ${LOG_LIB} ${CURL_LIBRARIES})
+target_link_libraries(${UTIL_LIB} PUBLIC ${CRYPTOGRAPHY_LIB} ${LOG_LIB})
+if(NOT WIN32)
+  target_link_libraries(${UTIL_LIB} PUBLIC CURL::libcurl)
+endif()
 target_link_libraries(${UTIL_LIB} PUBLIC
     nlohmann_json::nlohmann_json
     ghc_filesystem

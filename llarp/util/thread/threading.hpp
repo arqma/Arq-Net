@@ -4,6 +4,7 @@
 #include <thread>
 #include <shared_mutex>
 #include <mutex>
+#include <condition_variable>
 #include <nonstd/optional.hpp>
 
 #include "annotations.hpp"

@@ -1,9 +1,17 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.18...4.0.3)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
 endif()
+
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
+  cmake_policy(SET CMP0135 OLD)
+endif()
+
+cmake_policy(SET CMP0148 OLD)
+
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "macOS deployment target (Apple Clang only)")
 
 set(PROJECT_NAME arqnet)
 project(${PROJECT_NAME}
@@ -16,14 +24,6 @@ set(RELEASE_MOTTO "Privacy is a Must" CACHE STRING "Release motto")
 add_definitions(-DLLARP_VERSION_MAJOR=${arqnet_VERSION_MAJOR})
 add_definitions(-DLLARP_VERSION_MINOR=${arqnet_VERSION_MINOR})
 add_definitions(-DLLARP_VERSION_PATCH=${arqnet_VERSION_PATCH})
-
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
-  cmake_policy(SET CMP0135 NEW)
-  set(CMAKE_POLICY_DEFAULT_CMP0135 NEW)
-endif()
-
-cmake_policy(SET CMP0148 OLD)
-set(CMAKE_POLICY_DEFAULT_CMP0148 OLD)
 
 # Core options
 option(USE_AVX2 "enable avx2 code" OFF)
@@ -98,7 +98,7 @@ if(NOT WIN32)
   endif()
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

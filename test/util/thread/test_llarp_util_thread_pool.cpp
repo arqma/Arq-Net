@@ -11,6 +11,8 @@
 using namespace llarp;
 using namespace llarp::thread;
 
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(TryAdd);
+
 using LockGuard = std::unique_lock< std::mutex >;
 
 class PoolArgs
