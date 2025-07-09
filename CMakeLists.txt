@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.18...4.0.3)
 
+# --- Avoid double definition of _TCP_INITIAL_RTO_PARAMETERS on MinGW ---
+if(MINGW OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  add_definitions(-D_TCP_INITIAL_RTO_PARAMETERS_DEFINED)
+endif()
+
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
