@@ -75,7 +75,13 @@ jobs:
           wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz
           tar xzf libsodium-1.0.18.tar.gz
           cd libsodium-1.0.18
-          ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libsodium
+          export CC=x86_64-w64-mingw32-gcc
+          export CXX=x86_64-w64-mingw32-g++
+          export AR=x86_64-w64-mingw32-ar
+          export RANLIB=x86_64-w64-mingw32-ranlib
+          export STRIP=x86_64-w64-mingw32-strip
+          export LD=x86_64-w64-mingw32-ld
+          ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libsodium --disable-shared --enable-static
           make -j$(nproc)
           make install
 
