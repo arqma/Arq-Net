@@ -26,9 +26,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config libsystemd-dev
 
-      - name: Check LibUV version
-        run: pkg-config --modversion libuv || true
-
       - name: Build (make)
         run: make
 
@@ -48,7 +45,7 @@ jobs:
       - name: Install dependencies (Static Linux)
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake git libcap-dev curl libsodium-dev libcurl4-openssl-dev pkg-config
+          sudo apt-get install -y build-essential cmake git libcap-dev curl libsodium-dev libcurl4-openssl-dev pkg-config autoconf automake
 
       - name: Build static LibUV
         run: |
@@ -60,21 +57,14 @@ jobs:
           make -j$(nproc)
           make install
 
-      - name: Debug LibUV files
-        run: |
-          find $HOME/libuv-static
-          ls -l $HOME/libuv-static/lib
-          cat $HOME/libuv-static/lib/pkgconfig/libuv.pc || true
-
       - name: Set PKG_CONFIG_PATH for static LibUV
         run: echo "PKG_CONFIG_PATH=$HOME/libuv-static/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
-      - name: Static Build (CMake, z lokalnym libuv)
+      - name: Static Build (CMake, z PKG_CONFIG_PATH)
         env:
           PKG_CONFIG_PATH: $HOME/libuv-static/lib/pkgconfig:$PKG_CONFIG_PATH
-          LIBUV_ROOT: $HOME/libuv-static
         run: |
-          cmake -S . -B build -DWITH_SYSTEMD=OFF -DSTATIC_LINK=ON -DLIBUV_ROOT=$HOME/libuv-static
+          cmake -S . -B build -DWITH_SYSTEMD=OFF -DSTATIC_LINK=ON
           cmake --build build --target arqnet-static
 
   windows-build:
@@ -105,7 +95,6 @@ jobs:
           export AR=x86_64-w64-mingw32-ar
           export RANLIB=x86_64-w64-mingw32-ranlib
           export STRIP=x86_64-w64-mingw32-strip
-          export LD=x86_64-w64-mingw32-ld
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libsodium --disable-shared --enable-static
           make -j$(nproc)
           make install
@@ -120,8 +109,6 @@ jobs:
           export AR=x86_64-w64-mingw32-ar
           export RANLIB=x86_64-w64-mingw32-ranlib
           export STRIP=x86_64-w64-mingw32-strip
-          export LD=x86_64-w64-mingw32-ld
-          PKG_CONFIG_PATH="$HOME/mingw-libsodium/lib/pkgconfig"
           ./buildconf
           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libcurl --with-sodium=$HOME/mingw-libsodium --disable-shared --enable-static --without-ssl
           make -j$(nproc)
@@ -139,22 +126,19 @@ jobs:
           make -j$(nproc)
           make install
 
-      - name: Check MinGW libs
-        run: |
-          find $HOME/mingw-libsodium
-          find $HOME/mingw-libcurl
-          find $HOME/mingw-libuv
+      - name: Set PKG_CONFIG_PATH for MinGW static libs
+        run: echo "PKG_CONFIG_PATH=$HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
       - name: Build for Windows (make windows-release)
         env:
-          PKG_CONFIG_PATH: $HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig
+          PKG_CONFIG_PATH: $HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig:$PKG_CONFIG_PATH
           PKG_CONFIG: x86_64-w64-mingw32-pkg-config
           LIBSODIUM_ROOT: $HOME/mingw-libsodium
           LIBCURL_ROOT: $HOME/mingw-libcurl
           LIBUV_ROOT: $HOME/mingw-libuv
         run: |
-          which x86_64-w64-mingw32-pkg-config || true
-          x86_64-w64-mingw32-pkg-config --modversion libsodium || true
-          x86_64-w64-mingw32-pkg-config --modversion libcurl || true
-          x86_64-w64-mingw32-pkg-config --modversion libuv || true
+          which x86_64-w64-mingw32-pkg-config
+          x86_64-w64-mingw32-pkg-config --modversion libsodium
+          x86_64-w64-mingw32-pkg-config --modversion libuv
+          x86_64-w64-mingw32-pkg-config --modversion libcurl
           make windows-release
