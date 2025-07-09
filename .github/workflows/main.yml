@@ -129,6 +129,9 @@ jobs:
         run: |
           echo "PKG_CONFIG_PATH=$HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
+      - name: Set MinGW pkg-config in ENV
+        run: echo "PKG_CONFIG=x86_64-w64-mingw32-pkg-config" >> $GITHUB_ENV
+
       - name: Debug pkg-config for MinGW
         run: |
           which x86_64-w64-mingw32-pkg-config || echo "NO PKG-CONFIG"
@@ -138,8 +141,8 @@ jobs:
 
       - name: Build for Windows (make windows-release)
         env:
-          PKG_CONFIG_PATH: $HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig
-          PKG_CONFIG: x86_64-w64-mingw32-pkg-config
+          PKG_CONFIG_PATH: ${{ env.PKG_CONFIG_PATH }}
+          PKG_CONFIG: ${{ env.PKG_CONFIG }}
           LIBSODIUM_ROOT: $HOME/mingw-libsodium
           LIBCURL_ROOT: $HOME/mingw-libcurl
           LIBUV_ROOT: $HOME/mingw-libuv
