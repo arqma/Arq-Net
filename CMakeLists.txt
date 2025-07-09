@@ -107,7 +107,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 # this is messing with release builds
-add_compile_options(-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0)
+add_compile_options(-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1)
 
 if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND SHADOW)
   message( FATAL_ERROR "shadow-framework is Linux only" )
