@@ -126,6 +126,19 @@ jobs:
           make -j$(nproc)
           make install
 
+
+       - name: Build libuv for MinGW
+         run: |
+           wget https://dist.libuv.org/dist/v1.44.2/libuv-v1.44.2.tar.gz
+           tar xzf libuv-v1.44.2.tar.gz
+           cd libuv-v1.44.2
+           export CC=x86_64-w64-mingw32-gcc
+           export CXX=x86_64-w64-mingw32-g++
+           ./autogen.sh
+           ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libuv --disable-shared --enable-static
+           make -j$(nproc)
+           make install
+
       - name: Build for Windows (make windows-release)
         env:
           PKG_CONFIG_PATH: $HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig
