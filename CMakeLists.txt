@@ -25,6 +25,8 @@ project(${PROJECT_NAME}
     LANGUAGES C CXX)
 
 set(RELEASE_MOTTO "Privacy is a Must" CACHE STRING "Release motto")
+add_definitions(-DRELEASE_MOTTO="${RELEASE_MOTTO}")
+
 
 add_definitions(-DLLARP_VERSION_MAJOR=${arqnet_VERSION_MAJOR})
 add_definitions(-DLLARP_VERSION_MINOR=${arqnet_VERSION_MINOR})
