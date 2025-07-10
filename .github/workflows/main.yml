@@ -23,6 +23,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config libsystemd-dev
 
+      - name: Install latest CMake (3.29.6)
+        run: |
+          wget https://github.com/Kitware/CMake/releases/download/v3.29.6/cmake-3.29.6-linux-x86_64.tar.gz
+          tar -xzf cmake-3.29.6-linux-x86_64.tar.gz
+          echo "$PWD/cmake-3.29.6-linux-x86_64/bin" >> $GITHUB_PATH
+          cmake --version
+
       - name: Build (make)
         run: make
 
@@ -40,6 +47,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake git libcap-dev curl libsodium-dev libcurl4-openssl-dev pkg-config autoconf automake libtool
+
+      - name: Install latest CMake (3.29.6)
+        run: |
+          wget https://github.com/Kitware/CMake/releases/download/v3.29.6/cmake-3.29.6-linux-x86_64.tar.gz
+          tar -xzf cmake-3.29.6-linux-x86_64.tar.gz
+          echo "$PWD/cmake-3.29.6-linux-x86_64/bin" >> $GITHUB_PATH
+          cmake --version
 
       - name: Build static LibUV
         run: |
@@ -73,8 +87,14 @@ jobs:
       - name: Install dependencies (Windows cross-compile)
         run: |
           sudo apt-get update
-          # Install MinGW-w64 and tools, including pkg-config wrapper
           sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool curl wget gettext-base mingw-w64-tools
+
+      - name: Install latest CMake (3.29.6)
+        run: |
+          wget https://github.com/Kitware/CMake/releases/download/v3.29.6/cmake-3.29.6-linux-x86_64.tar.gz
+          tar -xzf cmake-3.29.6-linux-x86_64.tar.gz
+          echo "$PWD/cmake-3.29.6-linux-x86_64/bin" >> $GITHUB_PATH
+          cmake --version
 
       - name: Build libsodium for MinGW
         run: |
@@ -101,7 +121,6 @@ jobs:
           wget https://dist.libuv.org/dist/v1.44.2/libuv-v1.44.2.tar.gz
           tar xzf libuv-v1.44.2.tar.gz
           cd libuv-v1.44.2
-          # Patch to avoid TCP_INITIAL_RTO_PARAMETERS redefinition conflict
           sed -i 's|typedef struct _TCP_INITIAL_RTO_PARAMETERS {|#ifndef TCP_INITIAL_RTO_PARAMETERS\n&|' src/win/winapi.h
           sed -i '/} TCP_INITIAL_RTO_PARAMETERS, \*PTCP_INITIAL_RTO_PARAMETERS;/a #endif' src/win/winapi.h
           sh autogen.sh
@@ -127,7 +146,6 @@ jobs:
       - name: Set MinGW pkg-config in ENV
         run: echo "PKG_CONFIG=x86_64-w64-mingw32-pkg-config" >> $GITHUB_ENV
 
-      # Debug step: Check if MinGW pkg-config works and print versions
       - name: Debug pkg-config for MinGW
         run: |
           which x86_64-w64-mingw32-pkg-config || echo "NO PKG-CONFIG"

@@ -66,10 +66,10 @@ Build requirements:
 
 build:
 
-    $ sudo apt install build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config
+    $ sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config libsystemd-dev
     $ git clone https://github.com/arqma/arq-net
     $ cd arq-net
-    $ make 
+    $ make
 
 install:
 
@@ -97,7 +97,7 @@ cross compile fully static armhf (rpi 2 and up)
 
 build:
     make sure you have cmake, libuv and xcode command line tools installed
-    
+
     $ git clone https://github.com/arqma/arq-net
     $ cd arq-net
     $ make -j8
@@ -123,9 +123,9 @@ build requirements:
 * cpack
 
 setup:
- 
-    $ sudo apt install build-essential cmake git pkg-config mingw-w64 nsis
-    
+
+    $ sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool curl wget gettext-base mingw-w64-tools
+
 building:
 
     $ make windows-release DOWNLOAD_SODIUM=ON STATIC_LINK=ON
