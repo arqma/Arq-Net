@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.18...4.0.3)
 
+# --- Avoid double definition of _TCP_INITIAL_RTO_PARAMETERS on MinGW ---
+if(MINGW OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  add_definitions(-D_TCP_INITIAL_RTO_PARAMETERS_DEFINED)
+endif()
+
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
@@ -9,7 +14,7 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
   cmake_policy(SET CMP0135 OLD)
 endif()
 
-cmake_policy(SET CMP0148 OLD)
+#cmake_policy(SET CMP0148 OLD)
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "macOS deployment target (Apple Clang only)")
 
@@ -107,7 +112,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 # this is messing with release builds
-add_compile_options(-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0)
+add_compile_options(-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1)
 
 if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND SHADOW)
   message( FATAL_ERROR "shadow-framework is Linux only" )

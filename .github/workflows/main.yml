@@ -2,16 +2,15 @@ name: Build Arq-Net Linux & Windows
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
   pull_request:
-    branches:
-      - master
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
   linux-build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    name: Linux build (self-hosted)
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,11 +23,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config libsystemd-dev
 
+      - name: Install latest CMake (3.29.6)
+        run: |
+          wget https://github.com/Kitware/CMake/releases/download/v3.29.6/cmake-3.29.6-linux-x86_64.tar.gz
+          tar -xzf cmake-3.29.6-linux-x86_64.tar.gz
+          echo "$PWD/cmake-3.29.6-linux-x86_64/bin" >> $GITHUB_PATH
+          cmake --version
+
       - name: Build (make)
         run: make
 
   static-linux-build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    name: Static Linux build (self-hosted)
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,13 +46,37 @@ jobs:
       - name: Install dependencies (Static Linux)
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev libcurl4-openssl-dev pkg-config libsystemd-dev
+          sudo apt-get install -y build-essential cmake git libcap-dev curl libsodium-dev libcurl4-openssl-dev pkg-config autoconf automake libtool
 
-      - name: Static Build (make static STATIC_LINK=ON)
-        run: make static STATIC_LINK=ON
+      - name: Install latest CMake (3.29.6)
+        run: |
+          wget https://github.com/Kitware/CMake/releases/download/v3.29.6/cmake-3.29.6-linux-x86_64.tar.gz
+          tar -xzf cmake-3.29.6-linux-x86_64.tar.gz
+          echo "$PWD/cmake-3.29.6-linux-x86_64/bin" >> $GITHUB_PATH
+          cmake --version
+
+      - name: Build static LibUV
+        run: |
+          wget https://dist.libuv.org/dist/v1.44.2/libuv-v1.44.2.tar.gz
+          tar xzf libuv-v1.44.2.tar.gz
+          cd libuv-v1.44.2
+          sh autogen.sh
+          ./configure --prefix=$HOME/libuv-static --disable-shared --enable-static
+          make -j$(nproc)
+          make install
+
+      - name: Set PKG_CONFIG_PATH for static libuv
+        run: |
+          echo "PKG_CONFIG_PATH=$HOME/libuv-static/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+
+      - name: Static Build (CMake, without systemd)
+        run: |
+          cmake -S . -B build -DWITH_SYSTEMD=OFF -DSTATIC_LINK=ON
+          cmake --build build --target arqnet-static
 
   windows-build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    name: Windows cross-build (self-hosted)
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -56,29 +87,77 @@ jobs:
       - name: Install dependencies (Windows cross-compile)
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool
+          sudo apt-get install -y build-essential cmake git pkg-config mingw-w64 nsis autoconf automake libtool curl wget gettext-base mingw-w64-tools
+
+      - name: Install latest CMake (3.29.6)
+        run: |
+          wget https://github.com/Kitware/CMake/releases/download/v3.29.6/cmake-3.29.6-linux-x86_64.tar.gz
+          tar -xzf cmake-3.29.6-linux-x86_64.tar.gz
+          echo "$PWD/cmake-3.29.6-linux-x86_64/bin" >> $GITHUB_PATH
+          cmake --version
 
       - name: Build libsodium for MinGW
         run: |
           wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz
           tar xzf libsodium-1.0.18.tar.gz
           cd libsodium-1.0.18
-          ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libsodium
+          ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libsodium --disable-shared --enable-static
           make -j$(nproc)
           make install
 
-      - name: Build libcurl for MinGW
+      - name: Build libcurl for MinGW (without SSL)
         run: |
           wget https://curl.se/download/curl-7.82.0.tar.gz
           tar xzf curl-7.82.0.tar.gz
           cd curl-7.82.0
-          ./buildconf
-          ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libcurl --with-sodium=$HOME/mingw-libsodium --disable-shared --enable-static --without-zlib
+          PKG_CONFIG_PATH="$HOME/mingw-libsodium/lib/pkgconfig"
+          ./buildconf || true
+          ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libcurl --with-sodium=$HOME/mingw-libsodium --disable-shared --enable-static --without-ssl
           make -j$(nproc)
           make install
 
+      - name: Build libuv for MinGW (with patch for TCP_INITIAL_RTO_PARAMETERS)
+        run: |
+          wget https://dist.libuv.org/dist/v1.44.2/libuv-v1.44.2.tar.gz
+          tar xzf libuv-v1.44.2.tar.gz
+          cd libuv-v1.44.2
+          sed -i 's|typedef struct _TCP_INITIAL_RTO_PARAMETERS {|#ifndef TCP_INITIAL_RTO_PARAMETERS\n&|' src/win/winapi.h
+          sed -i '/} TCP_INITIAL_RTO_PARAMETERS, \*PTCP_INITIAL_RTO_PARAMETERS;/a #endif' src/win/winapi.h
+          sh autogen.sh
+          ./configure --host=x86_64-w64-mingw32 --prefix=$HOME/mingw-libuv --disable-shared --enable-static
+          make -j$(nproc)
+          make install
+
+      - name: Show built libraries for debugging
+        run: |
+          echo "libsodium:"
+          ls -lh $HOME/mingw-libsodium/lib/
+          echo "libcurl:"
+          ls -lh $HOME/mingw-libcurl/lib/
+          echo "libuv:"
+          ls -lh $HOME/mingw-libuv/lib/
+          echo "PC Files:"
+          ls -lh $HOME/mingw-libsodium/lib/pkgconfig/ $HOME/mingw-libcurl/lib/pkgconfig/ $HOME/mingw-libuv/lib/pkgconfig/
+
+      - name: Set PKG_CONFIG_PATH for MinGW build
+        run: |
+          echo "PKG_CONFIG_PATH=$HOME/mingw-libsodium/lib/pkgconfig:$HOME/mingw-libcurl/lib/pkgconfig:$HOME/mingw-libuv/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+
+      - name: Set MinGW pkg-config in ENV
+        run: echo "PKG_CONFIG=x86_64-w64-mingw32-pkg-config" >> $GITHUB_ENV
+
+      - name: Debug pkg-config for MinGW
+        run: |
+          which x86_64-w64-mingw32-pkg-config || echo "NO PKG-CONFIG"
+          x86_64-w64-mingw32-pkg-config --modversion libsodium || true
+          x86_64-w64-mingw32-pkg-config --modversion libuv || true
+          x86_64-w64-mingw32-pkg-config --modversion libcurl || true
+
       - name: Build for Windows (make windows-release)
         env:
+          PKG_CONFIG_PATH: ${{ env.PKG_CONFIG_PATH }}
+          PKG_CONFIG: ${{ env.PKG_CONFIG }}
           LIBSODIUM_ROOT: $HOME/mingw-libsodium
           LIBCURL_ROOT: $HOME/mingw-libcurl
+          LIBUV_ROOT: $HOME/mingw-libuv
         run: make windows-release
